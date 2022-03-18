@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<!-- saved from url=(0063)https://dswz.dengshentech.com/dswz/app/appindex.html?rrss=11111 -->
+<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--<meta http-equiv="X-UA-Compatible" content="IE=8" />-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>灯神旅行插件</title>
+    <link href="./files/bootstrap.min.css" rel="stylesheet">
+   <script src="./files/json2.js" type="text/javascript"></script>
+    <script src="./files/jquery.min.js" type="text/javascript"></script>
+    <script src="./files/bootstrap.min.js" type="text/javascript"></script>
+    <script src="./files/apputils.js" type="text/javascript"></script>
+    
+    <script>
+        /*
+        var GetPhoneInfo = window.dengine.GetAppVersion().toString(); //30301107
+        var RRGetEUid = window.dengine.RRGetEUid().toString();          //10242
+        var RRGetUid = window.dengine.RRGetUid().toString();           // 10242
+        var RRHdRP = window.dengine.RRHdRP().toString();                //1
+        alert("GetPhoneInfo: "+GetPhoneInfo);
+        alert("RRGetEUid: "+RRGetEUid);
+        alert("RRGetUid: "+RRGetUid);
+        alert("RRHdRP: "+RRHdRP);
+        */
+        
+    </script>
+    <style>
+        .exfeatherenable {
+            background-color: gold;
+        }
+    </style>
+    <script type="text/javascript">
+
+        var g_haserr = false;
+
+        function countstr(str, strb) {
+            var index = str.indexOf(strb);
+            var num = 0;
+            while (index !== -1) {
+                console.log(index);
+                num++;
+                index = str.indexOf(strb, index + 1);
+            }
+            return num;
+        }
+
+        function a_startswith_b(a, b) {
+            if (!a || !b || b.length > a.length)
+                return false;
+            if (a.substr(0, b.length) == b)
+                return true;
+            else
+                return false;
+            return true;
+        }
+
+        function _findcus3page(feathers) {
+            var page = "none";
+            var i = 0;
+            for (i = 0; i < feathers.length; i++) {
+                if (a_startswith_b(feathers[i], "ex_cus3_")) {
+                    page = feathers[i].replace("ex_cus3_", "");
+                    return page;
+                }
+            }
+            return page;
+        }
+
+        function _findstrin(feathers,str)
+        {
+            var i = 0;
+            for(i=0;i<feathers.length;i++)
+            {
+                if (feathers[i] == str) return true;
+            }
+            return false;
+        }
+        function showLicInfo(licinfo)
+        {
+            if (typeof (licinfo) == "undefined") return;
+            if (typeof (licinfo.exfeather) == "undefined") return;
+            var feathers = licinfo.exfeather.split(",");
+            if (_findstrin(feathers, "ex_yaqiang")) $("#ex_yaqiang").addClass("exfeatherenable");
+            if (_findstrin(feathers, "ex_multifire")) $("#ex_multifire").addClass("exfeatherenable");
+            if (_findstrin(feathers, "ex_multikeymap")) $("#ex_multikeymap").addClass("exfeatherenable");
+            if (_findstrin(feathers, "ex_freemouse")) $("#ex_freemouse").addClass("exfeatherenable");
+            if (_findstrin(feathers, "ex_kbmacro")) $("#ex_kbmacro").addClass("exfeatherenable");  
+            if (_findstrin(feathers, "ex_cfgplan2")) { $("#ex_cfgplan2").addClass("exfeatherenable"); $("#panelCfgPlan2").removeClass("hidden"); }
+            if (_findstrin(feathers, "ex_dswzrogp2")) $("#ex_dswzrogp2").addClass("exfeatherenable");
+            if (_findstrin(feathers, "ex_hascus3")) $("#btnCus3").removeClass("hidden");
+            if ((window.dengine.GetAppVersion() * 1) > 30301106) {
+                if (window.dengine.GetRRVal().startsWith("d")) {
+                    $("#ex_rooter").removeClass("hidden");
+                    $("#ex_rooter").text("D");
+                } else if (window.dengine.GetRRVal().startsWith("n")) {
+                    $("#ex_rooter").removeClass("hidden");
+                    $("#ex_rooter").text("N");
+                } else if (window.dengine.GetRRVal().startsWith("s")) {
+                    $("#ex_rooter").removeClass("hidden");
+                    $("#ex_rooter").text("S");
+                }
+            }
+            if (_findstrin(feathers, "ex_haserr")) {
+                g_haserr = true;
+                window.dengine.TerminatePhoneSync();
+                alert("存在尚未排查的未知问题请尽快排查!");
+            }
+
+            $("#exJifen").text("当前积分：" + licinfo.JiFen);
+            $("#exDaoqi").text("到期时间：" + licinfo.EndRiqi);
+            var dtoday = new Date(Date.now());
+            var dendriqi = new Date(licinfo.EndRiqi.replace(/-/g, "/"));
+            if (dtoday > dendriqi)
+            {
+                $("#btnPhoneSync").addClass("hidden");
+                $("#btnStartDSWZfast").addClass("hidden");
+                window.dengine.TerminatePhoneSync();
+                alert("软件授权已过期，请及时续费");
+                window.location.href = "/apporder/app_purchase.htm?lic=" + g_licnum + "&randnum=" + Math.random();
+                return;
+            }
+        }
+    </script>
+    <script type="text/javascript">
+
+        function getQueryString(name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]); return "";
+        }
+       
+        g_alertmsg = getQueryString("alertmsg");
+        g_zoomLittle = getQueryString("zoomlittle");
+      g_licnum = window.dengine.GetLic();
+      g_licinfo = {};
+      g_phoneinfo = "none"; //diff g_devinfo
+      g_shortname = "cjzc";
+      window.dengine.PrepareDswz();
+	  function setlicinfo(data)
+	  {
+	      g_licinfo = data;
+	      if(!g_licinfo.legal)
+	      {
+	          if (g_licinfo.bPinfan)
+	          {
+	              alert(g_licinfo.exMsg);
+	              window.dengine.TerminatePhoneSync();
+	              window.dengine.ExitProcess();
+	              return;
+	          }
+	          window.dengine.TerminatePhoneSync();
+	          alert("无有效的License，请输入正版License序列号"); //Must Alert
+	          window.location.href = "/dswz/app/inputlic.html?randseed=" + Math.random();
+	          return;
+	      }
+	      window.dengine.PrepareDswz();
+	      au_prepare_dsmagisk();
+	  }
+	  function web_refresh_lic_info()
+	  {
+	      var url = "/jsonapi/GetLicInfo.ashx?callbackname=orignalJson&lic=" + g_licnum + "&randseed=" + Math.random();
+	      $.get(url, function (data, status) {
+		      data='setlicinfo({"lic":"d6lic_952722030917393334204","legal":true,"bPinfan":false,"phones":[],"RegedPhoneCount":0,"LeftRegPhoneCount":10,"exMsg":"","licChecksum":"d6lic_952722030917393334204","level":1,"EndRiqi":"2022-12-03 15:27","ts":1670052442,"JiFen":10,"JinBi":10,"DengBi":10,"DailiLevel":669,"lic_type":"NORMAL","exfeather":"ex_wificonnect,ex_tiyan,,ex_freemouse","invitecode":7876,"seccode":null});';
+	          if (typeof (data) === 'string') {
+	              g_licinfo = JSON.parse(data);
+	          } else g_licinfo = data;
+	          showLicInfo(g_licinfo);
+	      });
+	  }
+	  function check_or_download_keymap(shortname,x,y)
+	  {
+	      var fname = window.dengine.GetDir(4) + "/keymap" + shortname + "_" + x + "_" + y + ".json";
+	      if (!window.dengine.FileExists(fname)) {
+	          $.get("/keymap/keymap" + shortname + "_" + x + "_" + y + ".json", function (data, status) {
+	              //save string
+	              var jsonstr = "";
+	              if (typeof (data) === 'string') {
+	                  jsonstr = data;
+	              } else { jsonstr = JSON.stringify(data); }
+	              window.dengine.save_keymap_jsonstring(shortname, x, y, jsonstr);
+	          });
+	      }
+	  }
+	  function adjust_norock() {
+	      var fname = window.dengine.GetDir(4) + "/a.b";
+	      if (window.dengine.FileExists(fname)) {
+	          window.dengine.SetRRVal("norocksu");
+	          window.dengine.RunProgram("rm " + fname, false);
+	          window.dengine.RunProgram("rm " + fname, true);
+	      }
+	  }
+	  function check_or_download_keymap2(shortname, x, y) {
+	      var f1name = window.dengine.GetDir(4) + "/keymap" + "cjzc" + "_" + x + "_" + y + ".json";
+	      var f2name = window.dengine.GetDir(4) + "/keymap" + shortname + "_" + x + "_" + y + ".json";
+	      if (!window.dengine.FileExists(f1name)) return false;
+	      if (!window.dengine.FileExists(f2name))
+	      {
+	          window.dengine.save_keymap_jsonstring(shortname, x, y, window.dengine.get_keymap_jsonstring("cjzc", x, y));
+	      }
+	      return true;
+	  }
+	  function removeGlTool()
+	  {	      
+	  }
+	  function on_download_complete(tag,size)
+	  {
+	      //window.location.reload();
+	      if (tag.startsWith("download_dswz_app_prepare")) window.dengine.CheckRights();
+	      if (tag == "dswzarrowtool_downloaded") {
+	          var dpath = window.dengine.GetDir(4);
+	          var fname = dpath + "/dswzarrowtool.apk";
+	          if (3000000 > (1 * size)) {
+	              alert("下载错误!");
+	              window.dengine.RunProgram("rm " + fname, true);
+	              return;
+	          }
+	          au_on_dswzarrowtool_downloaded2();	          
+	          showMsg("安装操作完成，建议马上立刻重启手机");
+	          window.dengine.SetConfigVar("dswzarrowtool_installed", "true");
+	          setTimeout(function (){
+    	          if (confirm("安装完成，建议马上立刻重启手机,是否重启")) {
+                       
+                         
+                        	window.dengine.RunProgram("reboot ", true);
+                       
+    	          }
+	          }, 3000);
+	      }
+	      else if (tag == "download_dswz_app_update") {
+	          if (80000 > (1 * size)) {
+	              alert("下载错误!");
+	          } else {
+	              alert("更新完成，请重新手机对码即可");
+	              window.location.reload();
+	          }
+	      }
+	      else if (tag == "dsm_downloaded")
+	      {
+	          var dpath = window.dengine.GetDir(4);
+	          var fname = dpath + "/dsm.rar";
+	          if (100 > (1 * size)) {	              
+	              window.dengine.RunProgram("rm " + fname, true);
+	              return;
+	          }
+	          au_on_dsm_downloaded();
+	      }
+	      return "ok";
+	  }
+	  function registerphonecallback(data)
+	  {
+	      var RegPhoneResp = data;
+	      if (typeof (data) === 'string') {
+	          RegPhoneResp = JSON.parse(data);
+	      }
+	      if(RegPhoneResp.result)
+	      {
+	          g_licinfo = RegPhoneResp.licInfo;
+	          $("#spanReg").text("已激活");
+	          showMsg("激活成功");
+	          var pi = get_reged_phone_info(g_devinfo.serialno);
+	          if (pi == null) {
+	              showMsg("环境异常，请退出软件重新从桌面启动软件");
+	          } else {
+	              check_or_download_keymap(g_shortname, pi.maxx, pi.maxy);	              
+	          }
+	          reloadphoneinfo();
+	      }else
+	      {
+	          window.dengine.TerminatePhoneSync();
+	          showMsg(RegPhoneResp.exMsg);
+	      }
+	  }
+	  document.write('<script src="/jsonapi/GetLicInfo.ashx?callbackname=setlicinfo&lic=' + g_licnum + '"><\/script>');
+    </script>
+    <script>
+        function callstub2(data) { };
+        function callstub(data) { g_devinfo = data; };
+        function get_reged_phone_info(sn)
+        {
+            if (g_licinfo.phones == null) return null;
+            var i = 0;
+            for(i=0;i<g_licinfo.phones.length;i++)
+            {
+                if (g_licinfo.phones[i].serialno == sn)
+                {
+                    return g_licinfo.phones[i];
+                }
+            }
+            return null;
+        }
+        function reg_current_phone()
+        {
+            //if (confirm("当前手机未激活，进行激活?") == true) 
+            {
+                $.post("/jsonapi/RegPhone.ashx",
+                        {
+                            callbackname: "registerphonecallback",
+                            lic: g_licnum,
+                            phonejsonstr: JSON.stringify(g_devinfo)
+                        },
+                        function (data, status) {
+                            eval(data);
+                        });
+            }
+        }
+        function refreshDevInfo() {
+            var strphoneinfo = window.dengine.GetPhoneInfo(); 
+            if (strphoneinfo.startsWith("callstub")) {
+                eval(strphoneinfo);
+            } else return;
+            if ((g_devinfo.ver * 1) < 20210120) {
+                window.dengine.TerminatePhoneSync();
+                window.dengine.RmDswzV2();
+                window.dengine.Update();
+                showMsg("正在更新请等待，优化游戏更新适配");
+                return;
+            }
+            if (g_devinfo.legal) {
+                $("#devCurrent").html("<p>手机已上线，直接启动灯神开始游戏吧</p>");
+                $("#liPhoneSync").hide();
+                var pi = get_reged_phone_info(g_devinfo.serialno);
+                if (pi == null) {
+                    reg_current_phone();
+                } else {
+                    $("#spanReg").text("已激活");
+                    check_or_download_keymap(g_shortname, pi.maxx, pi.maxy);
+                    reloadphoneinfo();
+                }
+            }
+            else {
+                alert("非正版系统，请联系客服");
+                $("#devCurrent").html("<p class='text-danger'>非正版系统，请联系客服!</p>");
+            }
+            
+            $("#devCurrent").append("<pre>" +g_devinfo.keystr2+ "序列号:" + window.dengine.GetMac() + " 小版本号:" + g_devinfo.ver + "  X:" + g_devinfo.maxx + "  Y:" + g_devinfo.maxy + "</pre>");
+
+        };
+
+        function reloadphoneinfo() {
+            if (typeof (g_devinfo) == "undefined") {                
+                return;
+            }            
+            var pi = get_reged_phone_info(g_devinfo.serialno);
+            if (pi == null) {
+                return;
+            }
+            $("#sp_kuanchang").text(pi.maxx + "*" + pi.maxy);
+            if ((g_phoneinfo != "none") && ((g_phoneinfo.kv * 1) == (g_devinfo.kv * 1))) return;
+
+            $.get("/jsonapi/GetPhoneInfo.ashx",
+                {
+                    callbackname: "orignalJson",
+                    lic: g_licnum,
+                    phonejsonstr: JSON.stringify(g_devinfo),
+                    randseed: Math.random()
+                },
+                function (data, status) {
+                    var p = {};
+                    if (typeof (data) === 'string') {
+                        p = JSON.parse(data);
+                    } else p = data;
+                    if (p.result)
+                    {
+                        g_phoneinfo= p.exTag;
+                        $("#btnStartDSWZfast")[0].disabled = false;
+                        $("#sp_sharecode").text(g_phoneinfo.sharecode);
+                    }
+                    else {
+                        alert(p.exMsg);
+                    }
+                });
+        }
+
+        function dsexists(data) {
+            var pi = get_reged_phone_info(g_devinfo.serialno);
+            if (pi == null) {
+                reg_current_phone();
+                return;
+            }
+            check_or_download_keymap(g_shortname, pi.maxx, pi.maxy);
+            var url = "http://192.168.6.1:88/getplugin.ds?pluginname=dskeymapsync&shortname=cjzc&maxx=" + pi.maxx + "&maxy=" + pi.maxy + "&random=" + Math.random();
+            window.location.href = url;
+        }
+
+        function checkGlTools()
+        {
+            var datlist = window.dengine.RunProgram("ls -l /system/lib | grep orig", true);
+            if (datlist.indexOf("v2_orig") != -1) {
+                showMsg("警告:检测到手机中存在GLTools!如果需要协助处理请先联系客服。");
+                return true;
+            }
+            return false;
+        }
+
+        $(document).ready(function () {
+            adjust_norock();
+            showLicInfo(g_licinfo);
+
+            //检查机型
+            
+            $("#btnCheckRoot").click(function () {                
+                if(window.dengine.CheckRootPriv()){
+                    showMsg("当前ROOT权限已开启，正常!");
+                }
+                else{
+                    showMsg("当前ROOT权限未开启，请开启ROOT权限!");
+                }               
+            });
+            
+            
+            $("#btntest2").click(function () {
+               var strphoneinfo = window.dengine.GetPhoneInfo();
+                        
+            });
+            
+            
+
+            $("#btnStartDSWZfast")[0].disabled = true;
+            
+            $("#btnXuFei").click(function () {
+                var url = "/apporder/app_purchase.htm?lic=" + g_licnum + "&randnum=" + Math.random();
+                window.location.href = url;
+            });
+            //
+            $("#btnStopDSWZ").click(function () {
+                if (window.dengine.StopDswz()) { showMsg("操作完成已停止键鼠操控\n如需使用系统键鼠请重新连接键鼠"); } else { showMsg("操作失败"); }
+            });
+
+            $("#btnStartDSWZfast").click(function () {
+                if (typeof (g_devinfo) == "undefined") {
+                    showMsg("手机未上线!请先进行手机对码");
+                    return;
+                }
+                if (g_haserr){
+                    showMsg("存在尚未排查的未知问题请尽快排查");
+                    return;
+                }
+                if (g_phoneinfo == "none") {
+                    showMsg("未获得授权");
+                    return;
+                }
+                $("#btnStartDSWZfast")[0].disabled = true;
+                //检查是否已经激活
+                var pi = get_reged_phone_info(g_devinfo.serialno);
+                if (pi == null) {
+                    reg_current_phone();
+                    $("#btnStartDSWZfast")[0].disabled = false;
+                    return;
+                }
+                check_or_download_keymap(g_shortname, pi.maxx, pi.maxy); //async  
+                //alert("提示：如果当前键鼠插在手机上，请先拔下键鼠，然后单击确定按钮继续");
+                //set phone info if(window.dengine.SetCfgInfo(g_shortname,0,pi.maxx, pi.maxy, g_licinfo.level*1,g_phoneinfo.keystr2*1,0,g_licinfo.ts*1))
+                
+                
+                 
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                if(window.dengine.SetCfgInfo(g_shortname,0,pi.maxx, pi.maxy, g_licinfo.level*1,g_phoneinfo.keystr2*1,0,g_licinfo.ts*1))
+                {
+                    if (window.dengine.StartDswz()) {
+                        showMsg("启动成功,请在【进入游戏之后】再将键鼠通过扩展坞连接到手机。键鼠操控以及呼出的鼠标箭头仅在游戏内有效，手机其他应用包括灯神界面本身请用手操作。");
+                    } else { showMsg("启动失败"); }
+                }
+                else { alert("配置错误，请重新对码"); window.location.reload();}
+                
+                $("#btnStartDSWZfast")[0].disabled = false;
+            });
+
+            $("#btnCheckPhoneSync").click(function () {
+                window.dengine.Zoom(100);
+                return;
+                var strphoneinfo = window.dengine.GetPhoneInfo();
+                if (strphoneinfo.startsWith("callstub")) {
+                    showMsg("手机在线!");  //eval(strphoneinfo);
+                } else { showMsg("手机未在线!"); }
+
+            });
+
+            $("#btnPhoneSync").click(function () {
+                if (g_haserr) {
+                    showMsg("存在尚未排查的未知问题请尽快排查");
+                    return;
+                }
+                $("#btnPhoneSync")[0].disabled = true;
+                if (!window.dengine.CheckRootPriv()) {
+                    showMsg("当前ROOT权限未开启，请开启ROOT权限!");
+                    $("#btnPhoneSync")[0].disabled = false;
+                    return;
+                }
+                if (window.dengine.PhoneSync()) //(jsphonesync())//
+                {
+                    alert("对码进行中，请等待3秒后单击确定");
+                    refreshDevInfo();
+                }
+                $("#btnPhoneSync")[0].disabled = false;
+            });
+
+           
+            $("#btnAdvancedCfg").click(function () {
+                if (typeof (g_devinfo) == "undefined") {
+                    showMsg("请先进行对码!");
+                    return;
+                }
+                var pi = get_reged_phone_info(g_devinfo.serialno);
+                if (pi == null) {
+                    if (confirm("当前手机未激活，进行激活?") == true) {
+                        $.post("/jsonapi/RegPhone.ashx",
+                                {
+                                    callbackname: "registerphonecallback",
+                                    lic: g_licnum,
+                                    phonejsonstr: JSON.stringify(g_devinfo)
+                                },
+                                function (data, status) {
+                                    eval(data);
+                                });
+                    }
+                    return;
+                }
+                var url = "/dswz/plugins/dsconfig.html?tver=190626&shortname=cjzc&maxx=" + pi.maxx + "&maxy=" + pi.maxy + "&rrss=" + Math.random();
+                window.location.href = url;
+                //window.dengine.OpenNewUrl(url);
+            });
+            $("#btnCopy1to2").click(function () {
+                if (typeof (g_devinfo) == "undefined") {
+                    showMsg("请先进行对码!");
+                    return;
+                }
+                var pi = get_reged_phone_info(g_devinfo.serialno);
+                if (pi == null) {
+                    if (confirm("当前手机未激活，进行激活?") == true) {
+                        $.post("/jsonapi/RegPhone.ashx",
+                                {
+                                    callbackname: "registerphonecallback",
+                                    lic: g_licnum,
+                                    phonejsonstr: JSON.stringify(g_devinfo)
+                                },
+                                function (data, status) {
+                                    eval(data);
+                                });
+                    }
+                    return;
+                }
+                if (confirm("确定将第一套键位及高级扩展配置复制至第二套吗?") != true) {
+                    return;
+                }
+                window.dengine.save_keymap_jsonstring("hpjy", pi.maxx, pi.maxy, window.dengine.get_keymap_jsonstring("cjzc", pi.maxx, pi.maxy));
+                alert("操作完成,已将第一套键位及高级扩展配置复制至第二套");
+            });
+            $("#btnAdvancedCfg2").click(function () {
+                if (typeof (g_devinfo) == "undefined") {
+                    showMsg("请先进行对码!");
+                    return;
+                }
+                var pi = get_reged_phone_info(g_devinfo.serialno);
+                if (pi == null) {
+                    if (confirm("当前手机未激活，进行激活?") == true) {
+                        $.post("/jsonapi/RegPhone.ashx",
+                                {
+                                    callbackname: "registerphonecallback",
+                                    lic: g_licnum,
+                                    phonejsonstr: JSON.stringify(g_devinfo)
+                                },
+                                function (data, status) {
+                                    eval(data);
+                                });
+                    }
+                    return;
+                }
+                if (!check_or_download_keymap2("hpjy", pi.maxx, pi.maxy)) return;
+                var url = "/dswz/plugins/dsconfig.html?tver=190626&shortname=hpjy&maxx=" + pi.maxx + "&maxy=" + pi.maxy + "&rrss=" + Math.random();
+                window.location.href = url;
+            });
+            $("#btnKeymaper").click(function () {
+                if (typeof (g_devinfo) == "undefined") {
+                    showMsg("手机未上线!请进行对码");
+                    return;
+                }
+                var pi = get_reged_phone_info(g_devinfo.serialno);
+                if (pi == null) {
+                    reg_current_phone();
+                    return;
+                }
+                check_or_download_keymap(g_shortname, pi.maxx, pi.maxy);
+                var url = "/dswz/app/appkeymaper.html?tver=191120&shortname=cjzc&maxx=" + pi.maxx + "&maxy=" + pi.maxy+"&rrss="+Math.random();
+                window.location.href = url;
+            });
+            $("#btnKeymaper2").click(function () {
+                if (typeof (g_devinfo) == "undefined") {
+                    showMsg("手机未上线!请进行对码");
+                    return;
+                }
+                var pi = get_reged_phone_info(g_devinfo.serialno);
+                if (pi == null) {
+                    reg_current_phone();
+                    return;
+                }
+                if(!check_or_download_keymap2("hpjy", pi.maxx, pi.maxy)) return;
+                var url = "/dswz/app/appkeymaper.html?tver=191120&shortname=hpjy&maxx=" + pi.maxx + "&maxy=" + pi.maxy + "&rrss=" + Math.random();
+                window.location.href = url;
+            });
+            $("#btnStopPhoneSync").click(function () {
+                if (confirm("终止手机对码?"))
+                {
+                    window.dengine.TerminatePhoneSync();
+                    window.location.reload();
+                }                
+            });
+            $("#btnExitAPP").click(function () {
+                if(confirm("彻底结束当前APP吗?"))
+                {
+                    window.dengine.StopDswz();
+                    window.dengine.TerminatePhoneSync();
+                    window.dengine.ExitProcess();
+                }
+            });
+
+            //
+            $("#btnCheckMem").click(function () {                 
+                showMsg(window.dengine.RunProgram("free", false));
+            });
+           
+            $("#btnCheckUpdate").click(function () {                
+                var verint = window.dengine.GetAppVersion() * 1;
+                if (verint < 20200221) {
+                    showMsg("发现重大更新，请马上联系客服进行更新!");                    
+                }
+                else {
+                    showMsg("当前已经为最新版本20200221！");
+                }
+            });
+
+            $("#btnCheckLittleUpdate").click(function () {
+                if (typeof (g_devinfo) == "undefined") {
+                    showMsg("请先执行手机对码操作");
+                    return;
+                }
+                if ((g_devinfo.ver * 1) < 30331132) {
+                    if (confirm("发现更新，增加部分可选功能，更不更新都无所谓"))
+                    {
+                        window.dengine.TerminatePhoneSync();
+                        window.dengine.RmDswzV2();
+                        window.dengine.Update();
+                        showMsg("正在下载。请等待");
+                        return;
+                    }                    
+                }
+                else
+                {
+                    showMsg("当前已经为最新版本!");
+                    return;
+                }
+            });
+
+            $("#btnSyncKeymapToDS").click(function () {
+                if (typeof (g_devinfo) == "undefined") {
+                    showMsg("手机未上线!请进行对码");
+                    return;
+                }
+                if (window.location.protocol == "https:") {
+                    var pi = get_reged_phone_info(g_devinfo.serialno);
+                    if (pi == null) {
+                        reg_current_phone();
+                        return;
+                    }
+                    check_or_download_keymap(g_shortname, pi.maxx, pi.maxy);
+                    var url = "http://dswz.dengshentech.com/dswz/app/app_ds_httpv2.html?shortname=cjzc&maxx=" + pi.maxx + "&maxy=" + pi.maxy + "&random=" + Math.random();
+                    window.location.href = url;
+                }
+                else {
+                    $.getJSON("http://192.168.6.1:88/getplugin.ds?pluginname=dsexists&callbackname=?",
+                      {
+                          test: "d"
+                      },
+                      function (data) { }
+                      );
+                }
+            });
+
+            $("#btnScreenSize").click(function () {
+                showMsg(window.dengine.RunProgram("wm size", true));
+                $.get("/jsonapi/CheckNetworkInfo.ashx?nettype1=screensize&nettype2=" + g_licnum, function (data, status) {
+                    if (data == "unnormal") { alert('检测到网络故障'); }
+                });
+            });
+
+            $("#btnCus3").click(function () {
+                if (typeof (g_licinfo) == "undefined") return;
+                if (typeof (g_licinfo.exfeather) == "undefined") return;
+                var feathers = g_licinfo.exfeather.split(",");
+                var page = _findcus3page(feathers);
+                window.location.href = "/dswz/plugins/cus3_" + page + ".html?rrss=" + Math.random();
+                return;                
+            });
+
+            $("#a3030").click(function () {
+                var v = prompt("当前版本为3030", 3030);
+                if (v == "1975") {
+                    window.location.href = "/dswz/app/inputlic.html?randseed=" + Math.random();
+                    return;
+                }
+                else if(v=="3993")
+                {
+                    window.dengine.SetOffsetX(window.dengine.GetOffsetXCfg() * 1);
+                    window.dengine.SetAppPort(window.dengine.GetAppPortCfg() * 1);
+                    window.dengine.SetArrowIdx(0);
+                    window.dengine.ShowArrow();
+                    window.dengine.startScreenCap();
+                }
+                else if (v == "3994") {
+                    window.dengine.SetOffsetX(240 * 1);
+                    window.dengine.SetAppPort(window.dengine.GetAppPortCfg() * 1);
+                    window.dengine.SetScopePosXY(1720, 436);
+                    window.dengine.SetArrowIdx(0);
+                    window.dengine.ShowArrow();
+                    window.dengine.startScreenCap();
+                }
+                else if (v == "3995") {
+                    window.location.href = "https://dswz.dengshentech.com/dswz/plugins/yqtools.html?rrss=" + Math.random();
+                    return;
+                }
+                else if(v=="1999")
+                {
+                    window.dengine.TerminatePhoneSync();
+                    window.dengine.RmDswzV2();
+                    window.dengine.Update();
+                    showMsg("正在强制重新更新。请等待");
+                    return;
+                }
+                else if (v == "199988") {
+                    if (window.dengine.IsSystemApp()) {
+                        alert("系统应用");
+                    } else {
+                        alert("正常应用");
+                    }
+                }
+                else if (v == "2992") {
+                    window.dengine.TerminatePhoneSync();
+                    window.dengine.RmDswzV2();
+                    window.dengine.Update22();
+                    showMsg("正在强制重新更新22。请等待");
+                    return;
+                }
+                else if(v=="1988")
+                {
+                    window.dengine.setsmode(0);
+                    return;
+                }
+                else if (v == "4399")
+                {
+                    window.location.href = "https://dswz.dengshentech.com/dswz/app/appindex.html?rrss=" + Math.random();
+                    return;
+                }
+                else if(v=="2191")
+                {
+                    window.dengine.SetXVal("no");
+                    window.location.href = "http://dswz.dengshentech.com/dswz/app/gatepage.html?rrsss=" + Math.random();
+                }
+                else if(v=="4397")
+                {
+                    window.location.href = "http://192.168.123.1:88/getplugin.ds?pluginname=dskmapidx&rss=" + Math.random();
+                }
+                else if (v == "4396") {
+                    window.location.href = "http://192.168.6.1:88/getplugin.ds?pluginname=dskmapidx&rss=" + Math.random();
+                }
+                else if (v == "4395") {
+                    //alert(window.dengine.IsSystemApp());
+                    window.location.href = "/dswz/app/appindex2.html?rss=" + Math.random();
+                    showMsg("这是一个测试");
+                    alert("这是另一个测试");
+                }
+                else if (v == "9986") {
+                    window.dengine.SetRRVal("norocksu");
+                    var msg = window.dengine.GetRRVal();
+                    alert("完成设置"+msg);
+                }
+                else if (v == "99872") {
+                    window.dengine.SetRRVal("dswzdaemon");
+                    var msg = window.dengine.GetRRVal();
+                    alert("完成设置" + msg);
+                }
+                else if (v == "9988") {
+                    window.dengine.SetRRVal("su");
+                    var msg = window.dengine.GetRRVal();
+                    alert("完成设置" + msg);
+                }
+                else if (v == "9989") {
+                    showMsg(window.dengine.RunProgram("ps -AZ | grep dswz", true));
+                }
+                else if ((v+"").startsWith("998866")) {
+                    window.location.href = "https://dswz.dengshentech.com/dswz/plugins/"+v+".html?rrss=" + Math.random();
+                    return;
+                }
+            });
+
+            $("#btnCheckGLTools").click(function () {
+                if(!checkGlTools())
+                {
+                    showMsg("未检测到GLTools");
+                }
+            });
+
+            $("#btnClearGLTools").click(function () {
+                if (!checkGlTools()) {
+                    showMsg("未检测到GLTools");
+                    return;
+                }
+                //if (prompt("请输入邀请码", "请输入邀请码") == "31415926")
+                
+                if(confirm("即将清理GLTools，仅在ROG和部分机型测试过，是否继续?"))
+                {
+                    removeGlTool();
+                }
+                
+            });
+           
+        //----------Mouse Arrow
+            $("#btnShowArrow1").click(function () {
+                window.dengine.SetOffsetX(window.dengine.GetOffsetXCfg() * 1);
+                window.dengine.SetAppPort(window.dengine.GetAppPortCfg() * 1);
+                window.dengine.SetArrowIdx(0);
+                window.dengine.ShowArrow();
+               
+            });
+            $("#btnShowArrow2").click(function () {
+                window.dengine.SetOffsetX(window.dengine.GetOffsetXCfg() * 1);
+                window.dengine.SetAppPort(window.dengine.GetAppPortCfg() * 1);
+                window.dengine.SetArrowIdx(1);
+                window.dengine.ShowArrow();
+
+            });
+            $("#btnHideArrow").click(function () {
+                window.dengine.HideArrow();
+            });
+            $("#btnSetArrowOffset").click(function () {
+                var v = prompt("请输入偏移值", window.dengine.GetOffsetXCfg());
+                if (v == null) return;
+                v = 1 * v;
+                if (v >= 0) {
+                    window.dengine.SetOffsetXCfg(v);
+                    window.dengine.SetOffsetX(v * 1);
+                    window.dengine.ToastShowMsg("已设置鼠标偏移为"+v);
+                }
+
+            });
+            $("#btnSetSyncCode").click(function () {
+                var v = prompt("请输入鼠标同步码(请勿擅自修改)", window.dengine.GetAppPortCfg());
+                if (v == null) return;
+                v = v * 1;
+                if (v >= 1000) { 
+                    window.dengine.SetAppPortCfg(v);
+                    window.dengine.SetAppPort(v * 1);
+                    window.dengine.ToastShowMsg("已设置鼠标同步码为" + v);
+                }
+            });
+            $("#btnSysInstallMouse").click(function () {
+
+                if ((window.dengine.GetAppVersion() * 1) < 20200221) {
+                    showMsg("当前版本不支持，请更新到旅行旅行II");
+                    return;
+                }
+
+                if (!window.dengine.CheckRootPriv()) {
+                    showMsg("当前ROOT权限未开启，请开启ROOT权限!");                    
+                    return;
+                }
+                
+                var datlist = window.dengine.RunProgram("ls -l /data/data | grep arrowtool", true);
+                if (datlist.indexOf("dswzarrowtool") != -1) {
+                    showMsg("当前手机已经安装有[灯神鼠标箭头]APP了，如果不是系统应用(亮黄色)，请先联系客服。");
+                    return;
+                }
+                $("#btnSysInstallMouse")[0].disabled = true;
+                showMsg("正在下载请耐心等待!");
+                window.dengine.WebDownloadFileAsync("http://www.pubcdn.dengshentech.com/dswzapp/dswzarrow0221.apk", "dswzarrowtool.apk", "dswzarrowtool_downloaded");
+            });
+
+            if (window.dengine.GetConfigVar("dswzarrowtool_installed", "false") == "true") {
+                //$("#btnSysInstallMouse").addClass("hidden");
+                $("#pMouseNotice").removeClass("hidden");
+                $("#ulMouseNotice").addClass("hidden");                
+            }
+
+            if ((window.dengine.GetAppVersion() * 1) >= 20200221) {
+                $("#hTitle").text("灯神旅行版II");
+            }
+         
+            if ((window.dengine.GetAppVersion() * 1) < 20200221) {
+                alert("当前版本已过期，请使用最新版本");
+                window.dengine.TerminatePhoneSync();
+                window.dengine.ExitProcess();
+            }
+
+        //---------Mouse ArrowEnd
+            $("#spanVersion").text(window.dengine.GetAppVersion());
+            window.dengine.Zoom(200);
+            
+            $.get("/dswz/plugins/dsexists.html",
+            {
+                callbackname: "orignalJson",
+            },
+            function (data, status) {                
+                refreshDevInfo();
+            });
+            checkGlTools();
+            if (isXposedInstalled()) {
+                $("#divXposedAlert").removeClass("hidden");                
+            }
+        });
+    </script>
+    
+    <script type="text/javascript">
+        function showMsg(msg)
+        {
+            $("#pNotice").text(msg);
+            $("#msgBox").modal('show');
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div style="margin-top:20px"></div>
+        <div class="alert alert-danger alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+            <strong>注意(客服QQ1:appindex)!</strong><a target="_blank" href="https://wpa.qq.com/msgrd?v=3&amp;uin=111111&amp;site=qq&amp;menu=yes"><img border="0" src="./files/button_111.gif" alt="联系我们" title="联系我们"></a>
+            <div class="hidden"><strong>客服QQ2:2783639612</strong><a target="_blank" href="https://wpa.qq.com/msgrd?v=3&amp;uin=111111&amp;site=qq&amp;menu=yes"><img border="0" src="./files/button_111.gif" alt="灯神客服2号" title="灯神客服2号"></a></div>
+            重要提醒:本应用自行卸载后将无法再次安装。请勿随意卸载本应用或者随意手机刷机以防数据丢失! 1增加部分可选功能，更不更新都无所谓。
+        </div>
+        <div id="divFuckerAlert" class="alert alert-warning alert-dismissible hidden" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+            <strong>注意!</strong> 1.灯神PC版、旅行版、路由版都不会读取也不会修改任何游戏数据，就目前掌握的情况，本产品使用一切正常。 2.如果是因灯神系列产品而导致的安全问题，我们会第一时间通知大家不会隐瞒（即便有问题也不会退款，所以不用担心我们隐瞒，若确定有问题一定会第一时间通知大家，这也是我们一贯实事求是的作风）3.部分玩家手机环境可能安装过很多未知app，如果不确定环境是否安全，建议订购第二次刷机项目然后联系我们刷机以及清理环境，费用可能略有上调欢迎批评。
+        </div>
+        <div id="divXposedAlert" class="alert alert-warning alert-dismissible hidden" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+            <strong>警告!</strong> 检测到手机环境存在安全隐患，请尽快人工排查!
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <span id="ex_yaqiang" class="badge" style="margin-left:5px;">压枪</span>
+                <span id="ex_multifire" class="badge" style="margin-left:5px;">连击</span>
+                <span id="ex_multikeymap" class="badge hidden" style="margin-left:5px;">一键多点</span>
+                <span id="ex_freemouse" class="badge" style="margin-left:5px;">鼠标呼出</span>
+                <span id="ex_kbmacro" class="badge" style="margin-left:5px;">键盘宏</span>
+                <span id="ex_cfgplan2" class="badge" style="margin-left:5px;">第二套键位</span>
+                <span id="ex_dswzrogp2" class="badge" style="margin-left:5px;">无需插拔</span>
+                <span id="ex_rooter" class="badge exfeatherenable hidden" style="margin-left:5px;">默认</span>
+                <span id="exJifen" class="badge" style="background-color:dodgerblue;margin-left:5px;">当前积分：0</span>
+                <span id="exDaoqi" class="badge" style="background-color:dodgerblue;margin-left:5px;">到期日期：</span>
+                <a id="btnXuFei" class="btn btn-sm btn-danger ">立即续费及订购增强功能</a><small class="hidden pull-right">邀请新用户可获赠积分兑换新功能哦</small>
+            </div>
+        </div>
+        <div class="">
+            <div class="">
+                <h3 id="hTitle" style="display:inline-block;margin-right:20px">灯神旅行(请尽快联系客服更新)</h3><small><a class="" href="http://122.114.77.132/dswz/app/appindex.html" target="_blank">http://www.xx.com</a></small>
+            </div>
+            <div class="" style="float:right">
+                <label style="display:inline-block;">界面:</label><span id="spanVersion" class="">2019</span><a id="btnCheckUpdate" class="hidden" style="display:inline-block;">检查大更新</a><a id="btnCheckLittleUpdate" class="" style="display:inline-block;">检查更新</a>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading"><span id="spanReg" class="hidden">未激活</span><span>当前触屏尺寸配置为</span><span id="sp_kuanchang" class="badge" style="margin-left:5px;font-size:10px">none</span><span id="sp_sharecode" class="badge" style="margin-left:5px;font-size:10px">none</span></div>
+            <div id="devCurrent" class="panel-body">
+                <p>当前手机未在线，请将手机ROOT权限开启后单击手机对码</p>
+                <p>常见问题：该操作需要在手机ROOT权限授权,然后单击【手机对码】按钮</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-7">
+                <ul class="list-group">
+                    <li class="list-group-item"> <button id="btnCheckRoot" type="button" class="btn  btn-warning">检查_ROOT权限(前提)</button>
+                        <button id="btnCheckGLTools" type="button" class="btn  btn-warning hidden" style="margin-left:30px">检测GLTools</button>
+                        <button id="btnClearGLTools" type="button" class="btn  btn-warning hidden" style="margin-left:30px">一键干掉GLTools(ROG)</button>
+                        <button id="btnCheckPhoneSync" type="button" class="btn  btn-warning " style="margin-left:30px">缩小页面</button></li>
+                    <li id="liPhoneSync" class="list-group-item">
+                        <button id="btnPhoneSync" type="button" class="btn btn-info">(1)手机对码</button>                       
+                    </li>
+                    <li class="list-group-item"> <button id="btnStartDSWZfast" type="button" class="btn  btn-success">(2)启动灯神(开始操控)</button></li>
+                    <li class="list-group-item"> <button id="btnStopDSWZ" type="button" class="btn btn  btn-warning">关闭灯神(Ctrl+F12停止操控)</button></li>
+                    <li class="list-group-item"> <button id="btnKeymaper" type="button" class="btn  btn-info">自定义键位配置</button></li>
+                    <li class="list-group-item"> <button id="btnAdvancedCfg" type="button" class="btn  btn-info">高级扩展配置</button></li>
+                    <li class="list-group-item "> <button id="btnStopPhoneSync" type="button" class="btn btn-warning ">终止手机对码</button></li>
+                    <li class="list-group-item"><button id="btntest2" type="button" class="btn  btn-warning">测试</button></li>
+                    <li class="list-group-item"> <button id="btnExitAPP" type="button" class="btn btn-danger">彻底退出应用</button></li>  
+                    <li class="list-group-item"><h5>注意手机横放摄像头靠左，任何时候单击鼠标滚轮中键可以开始或者恢复操控，按波浪键可以释放触屏占用</h5></li> 
+                    <li class="list-group-item "> <button id="btnCheckMem" type="button" class="btn  btn-info">查看手机内存占用</button></li>
+                </ul>
+            </div>
+            <div class="col-md-5">
+                <h3 class="text-warning">让男人省事，女人不省人事。</h3>
+                <h3 class="text-warning">游戏微信区进聊天室(3960000)</h3>
+               
+            </div>
+        </div>
+        <div id="panelCfgPlan2" class="row hidden">
+            <div class="col-md-7">
+                <ul class="list-group">
+                    <li class="list-group-item"> <button id="btnKeymaper2" type="button" class="btn  btn-info">第二套键位配置</button></li>
+                    <li class="list-group-item"> <button id="btnAdvancedCfg2" type="button" class="btn  btn-info">第二套高级扩展配置</button></li>
+                    <li class="list-group-item"> <button id="btnCopy1to2" type="button" class="btn  btn-info">将第一套配置复制到第二套</button></li>
+                    <li class="list-group-item">F31为使用方案一，F32为使用方案二，F31和F32可通过键盘宏改键来引出。注意一定要在松开键盘其他按键（尤其是WASD）的情况下敲击F31或者F32，以防冲突</li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">鼠标呼出<small>注意呼出鼠标箭头仅在游戏内或手机横屏时点击才有效</small></div>
+            <div class="panel-body">
+                <h3><button id="btnSysInstallMouse" type="button" class="btn btn-danger">安装[灯神鼠标箭头]为系统应用</button></h3>
+                <p id="pMouseNotice" class="">请在手机桌面上打开【灯神鼠标箭头】来创建鼠标箭头即可</p>
+                <ul id="ulMouseNotice" class="list-group ">
+                    <li class="list-group-item"> <button id="btnShowArrow1" type="button" class="btn  btn-success">显示鼠标箭头</button>玩游戏时除和平精英和灯神以外不要运行其他APP应用以防止占用过多手机内存导致鼠标箭头被清理</li>
+                    <li class="list-group-item">ROG请在游戏精灵中关闭通知消息屏蔽，防止鼠标箭头进游戏被屏蔽</li>
+                    <li class="list-group-item"> <button id="btnShowArrow2" type="button" class="btn btn  btn-success">显示小白点鼠标</button></li>
+                    <li class="list-group-item"> <button id="btnHideArrow" type="button" class="btn  btn-info">隐藏鼠标箭头</button></li>
+                    <li class="list-group-item"> <button id="btnSetArrowOffset" type="button" class="btn  btn-info">设置鼠标偏移</button></li>
+                    <li class="list-group-item"> <button id="btnSetSyncCode" type="button" class="btn btn-success">修改鼠标同步码(一般无需修改)</button></li>
+                </ul>
+</div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">其他功能</div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    <li class="list-group-item"> <button id="btnSyncKeymapToDS" type="button" class="btn  btn-success">与路由版之间键位同步(少用)</button></li> 
+                    <li class="list-group-item"> <button id="btnScreenSize" type="button" class="btn  btn-info">查看手机实际分辨率</button></li>
+                    <li class="list-group-item"> <button id="btnCus3" type="button" class="hidden btn  btn-info">系统检测</button></li>
+                </ul>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <span class="badge pull-left">价格监管及投诉监督QQ:(1967362555)</span>
+                <span id="a3030" class="badge pull-right">3030</span>
+            </div>
+        </div>
+        <div class="panel panel-warning hidden">
+            <div class="panel-heading ">命令日志</div>
+            <div class="panel-body">
+                <div id="results"></div>
+            </div>
+        </div>
+        <div class="modal fade" id="msgBox" tabindex="-1" role="dialog" aria-labelledby="msgBox-label">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        <h2 class="modal-title" id="msgBox-label">提示信息</h2>
+                    </div>
+                    <div class="modal-body">
+                        <h3 id="pNotice" class="text-danger">提示内容</h3>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">确定</button>
+                        <button type="button" class="btn btn-primary hidden">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+</body></html>
