@@ -1,0 +1,56 @@
+﻿
+        body {
+            -moz-user-select: none; 
+            -webkit-user-select: none;
+            -ms-user-select: none; 
+            -khtml-user-select: none; 
+            user-select: none;
+        }
+
+        #touchscreen {
+            position: relative;
+            margin: 0px;
+            padding: 0px;
+            width: 1000px;
+            height: 1000px;
+            /*background-image: url(/screencap.png);*/
+        }
+
+        .keypoint {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            opacity: 0.5;
+        }
+
+        #controlpanel {
+            position: absolute;
+            left: 200px;
+            top: 5px;
+        }
+
+        #PanelRemove {
+            position: absolute;
+            left: 870px;
+            top: 5px;
+        }
+
+        .btn-circle {
+            width: 80px;
+            height: 80px;
+            text-align: center;
+            padding: 6px 0;
+            font-size: 12px;
+            line-height: 1.428571429;
+            border-radius: 40px;
+        }
+
+        div#controlpanel button.btn {
+            min-width: 100px;
+            min-height: 80px;
+        }
+
+        div#PanelRemove button.btn {
+            min-width: 100px;
+            min-height: 80px;
+        }
